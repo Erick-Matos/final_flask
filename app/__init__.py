@@ -1,18 +1,15 @@
-
 import os
 from flask import Flask, render_template
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash
-from app.models import Usuario
 
-db = SQLAlchemy()
-migrate = Migrate()
+from app.extensions import db, migrate
+from app.models import Usuario
 
 def create_app():
     app = Flask(__name__, static_folder='static', template_folder='templates')
     app.config.from_object('config.Config')
+
     origins = app.config['CORS_ORIGINS'].split(',') if app.config['CORS_ORIGINS'] else ['*']
     CORS(app, origins=origins)
 
@@ -27,11 +24,12 @@ def create_app():
     with app.app_context():
         db.create_all()
 
-        # Criação automática do admin
+        # Criação automática de admin se variáveis estiverem definidas
         admin_email = os.getenv('ADMIN_EMAIL')
         admin_password = os.getenv('ADMIN_PASSWORD')
         admin_phone = os.getenv('ADMIN_TELEFONE', os.getenv('ADMIN_PHONE', '0000000000'))
         admin_name = os.getenv('ADMIN_NAME', 'admin')
+
         if admin_email and admin_password:
             if not Usuario.query.filter_by(email=admin_email).first():
                 hashed = generate_password_hash(admin_password)
