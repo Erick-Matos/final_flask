@@ -43,7 +43,7 @@ def create_app():
                 db.session.add(admin)
                 db.session.commit()
 
-    @app.route('/')
+    @app.route('/index')
     def home():
         return render_template('index.html')
 
